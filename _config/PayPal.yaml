@@ -16,7 +16,6 @@ PaymentFactory:
     gateway_classes: 
       live: PayPalExpressGateway
       dev: PayPalExpressGateway
-    model: 'PayPal'
 
 PayPalGateway:
   live:

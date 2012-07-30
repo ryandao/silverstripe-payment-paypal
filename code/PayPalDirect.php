@@ -13,11 +13,7 @@ class PayPalDirectGateway extends PayPalGateway {
     }
     
     $creditCardValidation = $data['CreditCard']->validate();
-    if (! $creditCardValidation->valid()) {
-      foreach ($creditCardValidation->messageList() as $error) {
-        $result->error($error);
-      }
-    }
+    $result->combineAnd($creditCardValidation);
     
     return $result;
   }

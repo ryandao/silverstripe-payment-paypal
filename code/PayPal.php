@@ -11,8 +11,6 @@
  *     
  */
 
-class PayPal extends Payment { }
-
 class PayPalGateway extends PaymentGateway {
   
   const SUCCESS_CODE = 'Success';
