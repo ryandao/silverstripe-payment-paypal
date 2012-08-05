@@ -8,7 +8,7 @@ class PayPalDirectTest extends SapphireTest {
   function setUp() {
     parent::setUp();
     
-    $paymentMethods = array('PayPalDirect');
+    $paymentMethods = array('dev' => array('PayPalDirect'));
     Config::inst()->remove('PaymentProcessor', 'supported_methods');
     Config::inst()->update('PaymentProcessor', 'supported_methods', $paymentMethods);
     

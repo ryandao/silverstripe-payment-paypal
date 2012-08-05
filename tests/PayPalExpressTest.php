@@ -8,7 +8,7 @@ class PayPalExpressTest extends SapphireTest {
   function setUp() {
     parent::setUp();
     
-    $paymentMethods = array('PayPalExpress');
+    $paymentMethods = array('dev' => array('PayPalExpress'));
     Config::inst()->remove('PaymentProcessor', 'supported_methods');
     Config::inst()->update('PaymentProcessor', 'supported_methods', $paymentMethods);
     
