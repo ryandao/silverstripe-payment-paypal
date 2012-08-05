@@ -89,11 +89,15 @@ class PayPalGateway extends PaymentGateway {
   }
   
   public function getSupportedCreditCardType() {
+    return array('visa', 'master', 'american_express');
+  }
+  
+  protected function creditCardTypeIDMapping() {
     return array(
-      'Visa' => 'Visa',
-      'MasterCard' => 'Master',
-      'Amex' => 'American Express',
-      'Maestro' => 'Maestro'
+      'visa' => 'Visa',
+      'master' => 'MasterCard',
+      'american_express' => 'Amex',
+      // 'Maestro' => 'Maestro' 
     );
   }
   

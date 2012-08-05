@@ -4,19 +4,6 @@
  * Implementation of PayPalDirectPayment
  */
 class PayPalDirectGateway extends PayPalGateway {
-  
-  public function validatePaymentData($data) {
-    $result = parent::validatePaymentData($data);
-    
-    if (! isset($data['CreditCard'])) {
-      $result->error('Credit card details are not available');
-    }
-    
-    $creditCardValidation = $data['CreditCard']->validate();
-    $result->combineAnd($creditCardValidation);
-    
-    return $result;
-  }
 
   public function process($data) {
     parent::process($data);
