@@ -8,7 +8,6 @@ PaymentFactory:
     gateway_classes:
       live: PayPalDirectGateway
       dev: PayPalDirectGateway
-    model: 'PayPal'
       
   PayPalExpress:
     title: 'PayPal Express Checkout'
