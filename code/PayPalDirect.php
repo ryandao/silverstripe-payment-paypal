@@ -10,24 +10,21 @@ class PayPalDirectGateway extends PayPalGateway {
 
     $this->postData['METHOD'] = 'DoDirectPayment';
     // Add credit card data. May have to parse the data to fit PayPal's format
-    $creditCard = $data['CreditCard'];
-    $this->postData['CREDITCARDTYPE'] = $creditCard->type;
-    $this->postData['ACCT'] = $creditCard->number;
-    $this->postData['EXPDATE'] = $creditCard->month . $creditCard->year;
+    $ccTypeMap = $this->creditCardTypeIDMapping();
+    $this->postData['CREDITCARDTYPE'] = $ccTypeMap[$data['CreditCardType']];
+    $this->postData['ACCT'] = $data['CardNumner'];
+    $this->postData['EXPDATE'] = $data['MonthExpiry'] . $data['YearExpiry'];
     //$this->postData['CVV2'] = $data['Cvv2'];
-    $this->postData['FIRSTNAME'] = $creditCard->firstName;
-    $this->postData['LASTNAME'] = $creditCard->lastName;
+    $this->postData['FIRSTNAME'] = $data['FirstName'];
+    $this->postData['LASTNAME'] = $data['LastName'];
 
     // Add optional parameters 
     $this->postData['IP'] = isset($data['IP']) ? $data['IP'] : $_SERVER['REMOTE_ADDR'];
 
     // Post the data to PayPal server
-    return $this->postPaymentData($this->postData);
-  }
-
-  public function getResponse($response) {
+    $response = $this->postPaymentData($this->postData);
     $responseArr = $this->parseResponse($response);
-
+    
     switch ($responseArr['ACK']) {
       case self::SUCCESS_CODE:
       case self::SUCCESS_WARNING:
@@ -39,7 +36,7 @@ class PayPalDirectGateway extends PayPalGateway {
       default:
         return new PaymentGateway_Result(false);
         break;
-    }
+    }   
   }
 }
 

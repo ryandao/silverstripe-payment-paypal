@@ -109,7 +109,7 @@ class PayPalGateway extends PaymentGateway {
     $authentication = self::get_authentication();
     
     $this->postData = array();
-    $this->postData['USER'] = $authentication['username'];
+    $this->postData['USER'] = $authentication[' '];
     $this->postData['PWD'] = $authentication['password'];
     $this->postData['SIGNATURE'] = $authentication['signature'];
     $this->postData['VERSION'] = self::PAYPAL_VERSION;
