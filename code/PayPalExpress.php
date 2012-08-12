@@ -13,34 +13,42 @@ class PayPalExpressGateway extends PayPalGateway {
 
   public function process($data) {
     parent::process($data);
-    
+
     $this->postData['METHOD'] = 'SetExpressCheckout';
     // Add return and cancel urls
     $this->postData['RETURNURL'] = $this->returnURL;
     $this->postData['CANCELURL'] = $this->cancelURL;
-    
-    $this->setExpressCheckout($this->data);
-    if ($this->token) {
-      // If Authorization successful, redirect to PayPal to complete the payment
-      Controller::curr()->redirect(self::get_paypal_redirect_url() . "?cmd=_express-checkout&token=$token");
+
+    $response = $this->postPaymentData($data);
+    if ($response->getStatusCode() != '200') {
+      return PaymentGateway_Failure($response);
     } else {
-      // Otherwise, do something...
+      if ($token = $this->getToken($response)) {
+        // If Authorization successful, redirect to PayPal to complete the payment
+        Controller::curr()->redirect(self::get_paypal_redirect_url() . "?cmd=_express-checkout&token=$token");
+      } else {
+        // Otherwise, return failure message
+        $errorList = $this->getErrors($response);
+        return PaymentGateway_Failure(null, null, $errorList);
+      }
     }
   }
-  
+
   /**
-   * Send a request to PayPal to authorize an express checkout transaction
+   * Get the token value from a valid HTTP response
+   *
+   * @param SS_HTTPResponse $response
+   * @return String token or null
    */
-  public function setExpressCheckout($data) {
-    // Post the data to PayPal server to get the token
-    $response = $this->parseResponse($this->postPaymentData($data));
-    
+  public function getToken($response) {
+    $responseArr = $this->parseResponse($response);
+
     if (isset($response['TOKEN'])) {
       $token = $response['TOKEN'];
       $this->token = $token;
       return $token;
     }
-    
+
     return null;
   }
 
@@ -68,10 +76,11 @@ class PayPalExpressGateway extends PayPalGateway {
           return new PaymentGateway_Result();
           break;
         case self::FAILURE_CODE:
-          return new PaymentGateway_Result(false);
+          $errorList = $this->getErrors($response);
+          return new PaymentGateway_Failure(null, null, $errorList);
           break;
         default:
-          return new PaymentGateway_Result(false);
+          return new PaymentGateway_Failure();
           break;
       }
     }
