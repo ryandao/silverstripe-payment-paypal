@@ -11,7 +11,7 @@
  *
  */
 
-class PayPalGateway extends PaymentGateway {
+class PayPalGateway extends PaymentGateway_GatewayHosted {
 
   const SUCCESS_CODE = 'Success';
   const SUCCESS_WARNING = 'SuccessWithWarning';
@@ -133,14 +133,18 @@ class PayPalGateway extends PaymentGateway {
     $responseString = $response->getBody();
     $responseArr = $this->parseResponse($response);
 
-    $errorFields = preg_match_all('/L_ERRORCODE\d+$/', $responseString, $matches);
-    $messageFields = preg_match_all('/L_LONGMESSAGE\d+$/', $responseString, $matches);
+    preg_match_all('/L_ERRORCODE\d+/', $responseString, $errorFields);
+    preg_match_all('/L_LONGMESSAGE\d+/', $responseString, $messageFields);
 
-    if (count($errorFields) != count($messageFields)) {
+    if (count($errorFields[0]) != count($messageFields[0])) {
       throw new Exception("PayPal resonse invalid: errors and messages don't match");
     } else {
-      for ($i = 0; $i < count($errorFields); $i++) {
-        $errorList[$errorFields[$i]] = $messageFields[$i];
+      for ($i = 0; $i < count($errorFields[0]); $i++) {
+        $errorField = $errorFields[0][$i];
+        $errorCode = $responseArr[$errorField];
+        $messageField = $messageFields[0][$i];
+        $errorMessage = $responseArr[$messageField];
+        $errorList[$errorCode] = $errorMessage;
       }
     }
 
