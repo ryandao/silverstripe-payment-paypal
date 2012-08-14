@@ -37,3 +37,4 @@ This module provides PayPal payment support for the SilverStripe Payment module.
           signature: 
 
 To get PayPal Sandbox test accounts, follow the [PayPal documentation](https://cms.paypal.com/cms_content/US/en_US/files/developer/PP_Sandbox_UserGuide.pdf). 
+**Note: If you have "Bad request" problem with PayPal, try to empty the browser cache and cookies.
