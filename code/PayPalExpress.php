@@ -29,7 +29,7 @@ class PayPalExpressGateway extends PayPalGateway {
       } else {
         // Otherwise, return failure message
         $errorList = $this->getErrors($response);
-        return PaymentGateway_Failure(null, null, $errorList);
+        return new PaymentGateway_Failure(null, null, $errorList);
       }
     }
   }
@@ -43,8 +43,8 @@ class PayPalExpressGateway extends PayPalGateway {
   public function getToken($response) {
     $responseArr = $this->parseResponse($response);
 
-    if (isset($response['TOKEN'])) {
-      $token = $response['TOKEN'];
+    if (isset($responseArr['TOKEN'])) {
+      $token = $responseArr['TOKEN'];
       $this->token = $token;
       return $token;
     }
