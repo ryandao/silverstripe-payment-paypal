@@ -1,18 +1,9 @@
 <?php
 /**
- * Configuration guide for PayPal payment:
- * In Payment settings:
- *   supported_methods:
- *     PayPalDirect:
- *       PayPal_Controller
- * or
- *     PayPalExpress:
- *       PayPal_Controller
- *
+ * Default class for the common API of PayPal Payment pro
  */
-
 class PayPalGateway extends PaymentGateway_GatewayHosted {
-
+  /* PayPal constants */
   const SUCCESS_CODE = 'Success';
   const SUCCESS_WARNING = 'SuccessWithWarning';
   const FAILURE_CODE = 'Failure';
@@ -25,14 +16,12 @@ class PayPalGateway extends PaymentGateway_GatewayHosted {
    */
   protected $postData;
 
-  /**
-   * The PayPal base redirection URL to process payment
-   */
+  /* The PayPal base redirection URLs to process payment */
   static $payPalRedirectURL = 'https://www.paypal.com/webscr';
   static $payPalSandboxRedirectURL = 'https://www.sandbox.paypal.com/webscr';
 
   /**
-   * Get the PayPal configuration
+   * Get the PayPal configuration from the config yaml file
    */
   public static function get_config() {
     return Config::inst()->get('PayPalGateway', self::get_environment());
@@ -83,15 +72,24 @@ class PayPalGateway extends PaymentGateway_GatewayHosted {
     $this->gatewayURL = self::get_url();
   }
 
+  /**
+   * @see PaymentGateway::getSupportedCurrencies()
+   */
   public function getSupportedCurrencies() {
     return array('AUD', 'CAD', 'CZK', 'DKK', 'EUR', 'HKD', 'HUF', 'JPY',
                  'NOK', 'NZD', 'PLN', 'GBP', 'SGD', 'SEK', 'CHF', 'USD');
   }
 
+  /**
+   * @see PaymentGateway::getSupportedCreditCardType()
+   */
   public function getSupportedCreditCardType() {
     return array('visa', 'master', 'american_express');
   }
 
+  /**
+   * @see PaymentGateway::creditCardTypeIDMapping()
+   */
   protected function creditCardTypeIDMapping() {
     return array(
       'visa' => 'Visa',
@@ -115,6 +113,9 @@ class PayPalGateway extends PaymentGateway_GatewayHosted {
     $this->postData['VERSION'] = self::PAYPAL_VERSION;
   }
 
+  /**
+   * @see PaymentGateay::process()
+   */
   public function process($data) {
     $this->preparePayPalPost();
     $this->postData['PAYMENTACTION'] = self::get_action();
@@ -123,10 +124,10 @@ class PayPalGateway extends PaymentGateway_GatewayHosted {
   }
 
   /**
-  * Return an array of errors from a PayPal response
+  * Return an array of errors and their messages from a PayPal response
   *
   * @param SS_HTTPResponse $response
-  * @return array of errors and their messages
+  * @return array
   */
   public function getErrors($response) {
     $errorList = array();
@@ -154,9 +155,9 @@ class PayPalGateway extends PaymentGateway_GatewayHosted {
   /**
    * Parse the raw data and response from gateway
    *
-   * @param $response - This can be the response string itself or the
-   *                    string encapsulated in a HTTPResponse object
-   * @return the parsed array
+   * @param $response This can be the response string itself or the
+   *        string encapsulated in a HTTPResponse object
+   * @return array
    */
   public function parseResponse($response) {
     if ($response instanceof RestfulService_Response) {
@@ -168,13 +169,8 @@ class PayPalGateway extends PaymentGateway_GatewayHosted {
     return $responseArr;
   }
 
-  public function getResponse($response) {
-    // To be overriden by subclasses
-  }
-
   /**
    * Override to add buiding query string manually.
-   * TODO: May consider doing this by default if other gateways work similarly
    *
    * @see PaymentGateway::postPaymentData()
    */

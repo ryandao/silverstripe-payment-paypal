@@ -38,7 +38,7 @@ class PayPalExpressGateway extends PayPalGateway {
    * Get the token value from a valid HTTP response
    *
    * @param SS_HTTPResponse $response
-   * @return String token or null
+   * @return String|null
    */
   public function getToken($response) {
     $responseArr = $this->parseResponse($response);
@@ -52,6 +52,9 @@ class PayPalExpressGateway extends PayPalGateway {
     return null;
   }
 
+  /**
+   * @see PaymentGateway_GatewayHosted
+   */
   public function getResponse($response) {
     // Get the payer information
     $this->preparePayPalPost();

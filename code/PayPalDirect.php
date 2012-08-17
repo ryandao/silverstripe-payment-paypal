@@ -4,7 +4,9 @@
  * Implementation of PayPalDirectPayment
  */
 class PayPalDirectGateway extends PayPalGateway {
-
+  /**
+   * @see PayPalGateway::process()
+   */
   public function process($data) {
     parent::process($data);
 
@@ -50,6 +52,9 @@ class PayPalDirectGateway extends PayPalGateway {
   }
 }
 
+/**
+ * Gateway class to mock up PayPalDirect for testing purpose
+ */
 class PayPalDirectGateway_Mock extends PayPalDirectGateway {
 
   /**
@@ -66,9 +71,10 @@ class PayPalDirectGateway_Mock extends PayPalDirectGateway {
   /**
    * Generate a dummy NVP response string with some pre-set value
    *
-   * @param $data - The payment data; $ack - The desired ACK code, default to Success
+   * @param array $data The payment data;
+   * @param String $ack The desired ACK code, default to Success
    *
-   *  @return the dummy response NVP string
+   * @return the dummy response NVP string
    */
   public function generateDummyResponse($data, $ack = null) {
     $templateArr = $this->parseResponse($this->responseTemplate);
@@ -86,6 +92,9 @@ class PayPalDirectGateway_Mock extends PayPalDirectGateway {
     return http_build_query($templateArr);
   }
 
+  /**
+   * @see PayPalDirectGateway::process()
+   */
   public function process($data) {
     $amount = $data['Amount'];
     $cents = round($amount - intval($amount), 2);
