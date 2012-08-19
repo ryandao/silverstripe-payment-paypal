@@ -16,7 +16,7 @@ class PayPalDirectGateway extends PayPalGateway {
     $this->postData['CREDITCARDTYPE'] = $ccTypeMap[$data['CreditCardType']];
     $this->postData['ACCT'] = $data['CardNumber'];
     $this->postData['EXPDATE'] = $data['MonthExpiry'] . $data['YearExpiry'];
-    //$this->postData['CVV2'] = $data['Cvv2'];
+    $this->postData['CVV2'] = $data['Cvc2'];
     $this->postData['FIRSTNAME'] = $data['FirstName'];
     $this->postData['LASTNAME'] = $data['LastName'];
 
@@ -101,14 +101,41 @@ class PayPalDirectGateway_Mock extends PayPalDirectGateway {
 
     switch ($cents) {
       case 0.00:
-        return new RestfulService_Response($this->generateDummyResponse($data, 'Success'));
+        $response = new RestfulService_Response($this->generateDummyResponse($data, 'Success'));
         break;
       case 0.01:
-        return new RestfulService_Response($this->generateDummyResponse($data, 'Failure'));
+        $response = new RestfulService_Response(null, '500');
         break;
+      case 0.02:
+        $response = new RestfulService_Response($this->generateDummyResponse($data, 'Failure'));
       default:
-        return new RestfulService_Response($this->generateDummyResponse($data, 'Failure'));
+        $response = new RestfulService_Response($this->generateDummyResponse($data, 'Failure'));
         break;
+    }
+
+    if ($response->getStatusCode() != '200') {
+      // Cannot connect to PayPal server
+      return new PaymentGateway_Failure($response);
+    } else {
+      $responseArr = $this->parseResponse($response);
+
+      if (! isset($responseArr['ACK'])) {
+        return new PaymentGateway_Failure();
+      } else {
+        switch ($responseArr['ACK']) {
+          case self::SUCCESS_CODE:
+          case self::SUCCESS_WARNING:
+            return new PaymentGateway_Success();
+            break;
+          case self::FAILURE_CODE:
+            $errorList = $this->getErrors($response);
+            return new PaymentGateway_Failure(null, null, $errorList);
+            break;
+          default:
+            return new PaymentGateway_Failure();
+            break;
+        }
+      }
     }
   }
 }

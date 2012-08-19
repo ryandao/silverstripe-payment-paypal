@@ -7,13 +7,13 @@ class PayPalDirectTest extends SapphireTest {
 
   function setUp() {
     parent::setUp();
-    
-    $paymentMethods = array('dev' => array('PayPalDirect'));
+
+    $paymentMethods = array('test' => array('PayPalDirect'));
     Config::inst()->remove('PaymentProcessor', 'supported_methods');
     Config::inst()->update('PaymentProcessor', 'supported_methods', $paymentMethods);
-    
+
     Config::inst()->remove('PaymentGateway', 'environment');
-    Config::inst()->update('PaymentGateway', 'environment', 'dev');
+    Config::inst()->update('PaymentGateway', 'environment', 'test');
 
     $this->processor = PaymentFactory::factory('PayPalDirect');
     $this->data = array(
@@ -22,60 +22,35 @@ class PayPalDirectTest extends SapphireTest {
       'CreditCard' => new CreditCard(array(
         'firstName' => 'Ryan',
         'lastName' => 'Dao',
-        'type' => 'MasterCard',
+        'type' => 'master',
         'month' => '11',
         'year' => '2016',
-        'number' => '4381258770269608'             
+        'number' => '4381258770269608'
       ))
     );
   }
 
   function testClassConfig() {
     $this->assertEquals(get_class($this->processor), 'PaymentProcessor_MerchantHosted');
-    $this->assertEquals(get_class($this->processor->gateway), 'PayPalDirectGateway');
-    $this->assertEquals(get_class($this->processor->payment), 'PayPal');
-  }
-
-  function testPaymentSuccess() {
-    $response = $this->processor->gateway->process($this->data);
-    $result = $this->processor->gateway->getResponse($response);
-    $this->assertEquals($result->getStatus(), PaymentGateway_Result::SUCCESS);
-  }
-
-  function testPaymentFailure() {
-    $this->data['Currency'] = 'xxx';
-    $response = $this->processor->gateway->process($this->data);
-    $result = $this->processor->gateway->getResponse($response);
-    $this->assertEquals($result->getStatus(), PaymentGateway_Result::FAILURE);  
-  }
-}
-
-class PayPalDirectMockTest extends PayPalDirectTest {
-  
-  function setUp() {
-    parent::setUp();
-    
-    Config::inst()->remove('PaymentGateway', 'environment');
-    Config::inst()->update('PaymentGateway', 'environment', 'test');
-    $this->processor = PaymentFactory::factory('PayPalDirect');
-  }
-  
-  function testClassConfig() {
-    $this->assertEquals(get_class($this->processor), 'PaymentProcessor_MerchantHosted');
     $this->assertEquals(get_class($this->processor->gateway), 'PayPalDirectGateway_Mock');
-    $this->assertEquals(get_class($this->processor->payment), 'PayPal');
+    $this->assertEquals(get_class($this->processor->payment), 'Payment');
   }
-  
+
   function testPaymentSuccess() {
-    $response = $this->processor->gateway->process($this->data);
-    $result = $this->processor->gateway->getResponse($response);
-    $this->assertEquals($result->getStatus(), PaymentGateway_Result::SUCCESS);
+    $this->processor->capture($this->data);
+    $this->assertEquals($this->processor->payment->Status, Payment::SUCCESS);
   }
-  
-  function testPaymentFailure() {
+
+  function testConnectionError() {
     $this->data['Amount'] = '10.01';
-    $response = $this->processor->gateway->process($this->data);
-    $result = $this->processor->gateway->getResponse($response);
-    $this->assertEquals($result->getStatus(), PaymentGateway_Result::FAILURE);
+    $this->processor->capture($this->data);
+    $this->assertEquals($this->processor->payment->Status, Payment::FAILURE);
+    $this->assertEquals($this->processor->payment->HTTPStatus, '500');
+  }
+
+  function testPaymentFailure() {
+    $this->data['Amount'] = '10.02';
+    $this->processor->capture($this->data);
+    $this->assertEquals($this->processor->payment->Status, Payment::FAILURE);
   }
 }
