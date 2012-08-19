@@ -4,17 +4,19 @@ name: PayPal
 PaymentFactory:
   PayPalDirect:
     title: 'PayPal Direct Payment'
-    controller: 'PaymentProcessor_MerchantHosted'
+    processor: 'PaymentProcessor_MerchantHosted'
     gateway_classes:
       live: PayPalDirectGateway
       dev: PayPalDirectGateway
-      
+      test: PayPalDirectGateway_Mock
+
   PayPalExpress:
     title: 'PayPal Express Checkout'
-    controller: 'PaymentProcessor_GatewayHosted'
-    gateway_classes: 
+    processor: 'PaymentProcessor_GatewayHosted'
+    gateway_classes:
       live: PayPalExpressGateway
       dev: PayPalExpressGateway
+      test: PayPalExpressGateway_Mock
 
 PayPalGateway:
   live:
