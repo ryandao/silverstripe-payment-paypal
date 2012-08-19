@@ -89,3 +89,41 @@ class PayPalExpressGateway extends PayPalGateway {
     }
   }
 }
+
+/**
+ * Gateway class to mock up PayPalExpress for testing purpose
+ */
+class PayPalExpressGateway_Mock extends PayPalExpressGateway {
+
+  /* Response template strings */
+  private $tokenResponseTemplate = 'TIMESTAMP=&CORRELATIONID=&TOKEN=&VERSION=BUILD=';
+  private $failureResponseTemplate = 'ACK=Failure&L_ERRORCODE0=&L_SHORTMESSAGE0=&L_LONGMESSAGE0=';
+
+  /**
+   * Generate a mock token response based on the template
+   */
+  public function generateDummyTokenResponse() {
+    $tokenResponseArr = $this->parseResponse($this->tokenResponseTemplate);
+
+    $tokenResponseArr['TIMESTAMP'] = time();
+    $tokenResponseArr['CORRELATIONID'] = 'cfcb59afaabb4';
+    $tokenResponseArr['TOKEN'] = '2d6TB68159J8219744P';
+    $tokenResponseArr['VERSION'] = self::PAYPAL_VERSION;
+    $tokenResponseArr['BUILD'] = '1195961';
+
+    return http_build_query($tokenResponseArr);
+  }
+
+  /**
+   * Generate a mock failure response based on the template
+   */
+  public function generateDummyFailureResponse() {
+    $failureResponseArr = $this->parseResponse($this->failureResponseTemplate);
+
+    $failureResponseArr['L_ERRORCODE0'] = '81002';
+    $failureResponseArr['L_SHORTMESSAGE0'] = 'Undefined Method';
+    $failureResponseArr['L_LONGMESSAGE0'] = 'Method specified is not supported';
+
+    return http_build_query($failureResponseArr);
+  }
+}
